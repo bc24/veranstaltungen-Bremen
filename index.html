@@ -1,0 +1,752 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Veranstaltungen Bremen</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --red: #c0392b;
+      --red-dark: #a93226;
+      --bg: #f4f4f6;
+      --card: #ffffff;
+      --text: #1a1a2e;
+      --muted: #6b7280;
+      --border: #e5e7eb;
+      --shadow: 0 2px 8px rgba(0,0,0,0.08);
+    }
+
+    body {
+      font-family: 'Segoe UI', system-ui, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+    }
+
+    /* ── Header ── */
+    header {
+      background: var(--red);
+      color: white;
+      padding: 0;
+    }
+
+    .header-top {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      padding: 20px 32px;
+    }
+
+    .header-top svg { flex-shrink: 0; }
+
+    .header-top h1 {
+      font-size: 1.75rem;
+      font-weight: 700;
+      letter-spacing: -0.5px;
+    }
+
+    .header-top p {
+      font-size: 0.9rem;
+      opacity: 0.85;
+      margin-top: 2px;
+    }
+
+    /* ── Controls bar ── */
+    .controls {
+      background: white;
+      border-bottom: 1px solid var(--border);
+      padding: 16px 32px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      align-items: center;
+    }
+
+    .search-wrap {
+      position: relative;
+      flex: 1;
+      min-width: 220px;
+      max-width: 420px;
+    }
+
+    .search-wrap svg {
+      position: absolute;
+      left: 12px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--muted);
+      pointer-events: none;
+    }
+
+    #search {
+      width: 100%;
+      padding: 10px 12px 10px 38px;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      font-size: 0.95rem;
+      outline: none;
+      transition: border-color .2s;
+    }
+
+    #search:focus { border-color: var(--red); }
+
+    .filters {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .filter-btn {
+      padding: 7px 14px;
+      border-radius: 20px;
+      border: 1.5px solid var(--border);
+      background: white;
+      font-size: 0.85rem;
+      cursor: pointer;
+      transition: all .15s;
+      color: var(--text);
+    }
+
+    .filter-btn:hover { border-color: var(--red); color: var(--red); }
+
+    .filter-btn.active {
+      background: var(--red);
+      border-color: var(--red);
+      color: white;
+    }
+
+    /* ── Sort & count bar ── */
+    .toolbar {
+      padding: 14px 32px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 0.9rem;
+      color: var(--muted);
+    }
+
+    #event-count { font-weight: 600; color: var(--text); }
+
+    .sort-wrap select {
+      padding: 6px 10px;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      font-size: 0.85rem;
+      cursor: pointer;
+      outline: none;
+    }
+
+    /* ── Grid ── */
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: 20px;
+      padding: 0 32px 40px;
+    }
+
+    /* ── Card ── */
+    .card {
+      background: var(--card);
+      border-radius: 12px;
+      box-shadow: var(--shadow);
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      transition: transform .2s, box-shadow .2s;
+    }
+
+    .card:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 8px 24px rgba(0,0,0,0.12);
+    }
+
+    .card-img {
+      height: 160px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 3rem;
+      background: linear-gradient(135deg, #f8d7d4, #fce4d6);
+    }
+
+    .card-body { padding: 16px; flex: 1; display: flex; flex-direction: column; }
+
+    .card-category {
+      display: inline-block;
+      font-size: 0.72rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+      padding: 3px 9px;
+      border-radius: 12px;
+      margin-bottom: 8px;
+    }
+
+    .card-title {
+      font-size: 1.05rem;
+      font-weight: 700;
+      margin-bottom: 6px;
+      line-height: 1.35;
+    }
+
+    .card-desc {
+      font-size: 0.85rem;
+      color: var(--muted);
+      line-height: 1.5;
+      flex: 1;
+      margin-bottom: 12px;
+    }
+
+    .card-meta {
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+      font-size: 0.82rem;
+      color: var(--muted);
+      padding-top: 12px;
+      border-top: 1px solid var(--border);
+    }
+
+    .meta-row { display: flex; align-items: center; gap: 6px; }
+
+    .card-footer {
+      padding: 12px 16px;
+      border-top: 1px solid var(--border);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .price {
+      font-weight: 700;
+      font-size: 0.95rem;
+      color: var(--red);
+    }
+
+    .price.free { color: #16a34a; }
+
+    .btn-ticket {
+      padding: 7px 14px;
+      background: var(--red);
+      color: white;
+      border: none;
+      border-radius: 7px;
+      font-size: 0.82rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background .15s;
+    }
+
+    .btn-ticket:hover { background: var(--red-dark); }
+
+    /* ── Category colors ── */
+    .cat-musik    { background: #fce7f3; color: #be185d; }
+    .cat-theater  { background: #ede9fe; color: #7c3aed; }
+    .cat-sport    { background: #dcfce7; color: #15803d; }
+    .cat-kultur   { background: #fff7ed; color: #c2410c; }
+    .cat-festival { background: #fef9c3; color: #a16207; }
+    .cat-kinder   { background: #dbeafe; color: #1d4ed8; }
+    .cat-food     { background: #f0fdf4; color: #166534; }
+    .cat-comedy   { background: #fff1f2; color: #be123c; }
+
+    /* card images per category */
+    .img-musik    { background: linear-gradient(135deg, #fce7f3, #fbcfe8); }
+    .img-theater  { background: linear-gradient(135deg, #ede9fe, #ddd6fe); }
+    .img-sport    { background: linear-gradient(135deg, #dcfce7, #bbf7d0); }
+    .img-kultur   { background: linear-gradient(135deg, #fff7ed, #fed7aa); }
+    .img-festival { background: linear-gradient(135deg, #fef9c3, #fde68a); }
+    .img-kinder   { background: linear-gradient(135deg, #dbeafe, #bfdbfe); }
+    .img-food     { background: linear-gradient(135deg, #f0fdf4, #dcfce7); }
+    .img-comedy   { background: linear-gradient(135deg, #fff1f2, #ffe4e6); }
+
+    /* ── Empty state ── */
+    .empty {
+      grid-column: 1 / -1;
+      text-align: center;
+      padding: 80px 20px;
+      color: var(--muted);
+    }
+
+    .empty svg { margin-bottom: 16px; opacity: .3; }
+    .empty h2 { font-size: 1.2rem; margin-bottom: 8px; color: var(--text); }
+
+    /* ── Responsive ── */
+    @media (max-width: 600px) {
+      .header-top { padding: 16px 16px; }
+      .controls { padding: 12px 16px; }
+      .toolbar { padding: 10px 16px; }
+      .grid { padding: 0 16px 32px; gap: 16px; }
+      .header-top h1 { font-size: 1.35rem; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ── Header ── -->
+<header>
+  <div class="header-top">
+    <svg width="48" height="48" viewBox="0 0 48 48" fill="none">
+      <rect width="48" height="48" rx="12" fill="rgba(255,255,255,0.15)"/>
+      <text x="24" y="34" text-anchor="middle" font-size="26">🏰</text>
+    </svg>
+    <div>
+      <h1>Veranstaltungen Bremen</h1>
+      <p>Entdecke Events in der Hansestadt</p>
+    </div>
+  </div>
+</header>
+
+<!-- ── Controls ── -->
+<div class="controls">
+  <div class="search-wrap">
+    <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+      <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
+    </svg>
+    <input id="search" type="text" placeholder="Suche nach Events, Orten …" />
+  </div>
+  <div class="filters" id="filters">
+    <button class="filter-btn active" data-cat="alle">Alle</button>
+    <button class="filter-btn" data-cat="musik">🎵 Musik</button>
+    <button class="filter-btn" data-cat="theater">🎭 Theater</button>
+    <button class="filter-btn" data-cat="sport">⚽ Sport</button>
+    <button class="filter-btn" data-cat="kultur">🏛️ Kultur</button>
+    <button class="filter-btn" data-cat="festival">🎪 Festival</button>
+    <button class="filter-btn" data-cat="kinder">🧸 Kinder</button>
+    <button class="filter-btn" data-cat="food">🍺 Food & Drink</button>
+    <button class="filter-btn" data-cat="comedy">😂 Comedy</button>
+  </div>
+</div>
+
+<!-- ── Toolbar ── -->
+<div class="toolbar">
+  <span><span id="event-count">0</span> Veranstaltungen gefunden</span>
+  <div class="sort-wrap">
+    <select id="sort">
+      <option value="date">Sortieren: Datum</option>
+      <option value="name">Sortieren: Name</option>
+      <option value="price-asc">Sortieren: Preis ↑</option>
+      <option value="price-desc">Sortieren: Preis ↓</option>
+    </select>
+  </div>
+</div>
+
+<!-- ── Grid ── -->
+<div class="grid" id="grid"></div>
+
+<script>
+// ── Data ────────────────────────────────────────────────────────────────────
+const events = [
+  {
+    id: 1,
+    title: "Werder Bremen vs. Bayer Leverkusen",
+    category: "sport",
+    emoji: "⚽",
+    date: "2026-06-07",
+    time: "15:30",
+    location: "wohninvest WESERSTADION",
+    address: "Franz-Böhmert-Str. 1c, 28205 Bremen",
+    desc: "Bundesliga-Heimspiel – Werder Bremen empfängt Bayer Leverkusen im ausverkauften Weser­stadion.",
+    price: 35,
+    tags: ["Bundesliga", "Fußball"]
+  },
+  {
+    id: 2,
+    title: "Bremer Musikfest 2026",
+    category: "musik",
+    emoji: "🎻",
+    date: "2026-06-12",
+    time: "19:00",
+    location: "Die Glocke",
+    address: "Domsheide 6-8, 28195 Bremen",
+    desc: "Internationales Klassik-Festival mit Orchestern aus ganz Europa im historischen Konzerthaus.",
+    price: 28,
+    tags: ["Klassik", "Orchester"]
+  },
+  {
+    id: 3,
+    title: "Schlachte-Zauber – Mittelalterfest",
+    category: "festival",
+    emoji: "🏰",
+    date: "2026-06-19",
+    time: "11:00",
+    location: "Schlachte",
+    address: "Schlachte, 28195 Bremen",
+    desc: "Das größte Mittelalterfest Norddeutschlands mit Rittern, Gauklern, Handwerkskunst und Live-Musik.",
+    price: 0,
+    tags: ["Mittelalter", "Familie", "Open Air"]
+  },
+  {
+    id: 4,
+    title: "Comedy Night im Lagerhaus",
+    category: "comedy",
+    emoji: "😂",
+    date: "2026-06-20",
+    time: "20:00",
+    location: "Lagerhaus",
+    address: "Schildstr. 12-19, 28203 Bremen",
+    desc: "Drei Stand-up-Comedians aus dem deutschsprachigen Raum – ein Abend voller Lacher und Überraschungen.",
+    price: 18,
+    tags: ["Stand-up", "Comedy"]
+  },
+  {
+    id: 5,
+    title: "Bremer Freimarkt",
+    category: "festival",
+    emoji: "🎡",
+    date: "2026-10-16",
+    time: "10:00",
+    location: "Bürgerweide",
+    address: "Bürgerweide, 28195 Bremen",
+    desc: "Einer der ältesten und größten Jahrmärkte Deutschlands – seit 1035! Fahrgeschäfte, Musik und Gastronomie.",
+    price: 0,
+    tags: ["Jahrmarkt", "Familie", "Tradition"]
+  },
+  {
+    id: 6,
+    title: "Peer Gynt – Schauspielhaus",
+    category: "theater",
+    emoji: "🎭",
+    date: "2026-06-14",
+    time: "19:30",
+    location: "Theater Bremen – Schauspielhaus",
+    address: "Goetheplatz 1-3, 28203 Bremen",
+    desc: "Henrik Ibsens Meisterwerk in einer modernen Inszenierung – Poesie, Abenteuer und tiefe Menschlichkeit.",
+    price: 24,
+    tags: ["Schauspiel", "Ibsen"]
+  },
+  {
+    id: 7,
+    title: "Übersee-Museum: Ozeanien-Sonderausstellung",
+    category: "kultur",
+    emoji: "🗺️",
+    date: "2026-06-01",
+    time: "10:00",
+    location: "Übersee-Museum",
+    address: "Bahnhofsplatz 13, 28195 Bremen",
+    desc: "Faszinierende Sonderausstellung über Kulturen und Ökosysteme des Pazifiks – mit Originalexponaten.",
+    price: 12,
+    tags: ["Museum", "Ausstellung"]
+  },
+  {
+    id: 8,
+    title: "Kinder-Zirkus Roncalli Junior",
+    category: "kinder",
+    emoji: "🎠",
+    date: "2026-06-22",
+    time: "15:00",
+    location: "ÖVB Arena",
+    address: "Findorffstr. 101, 28215 Bremen",
+    desc: "Akrobatik, Clownerie und magische Momente – das beliebte Kinderzirkusprogramm begeistert die ganze Familie.",
+    price: 16,
+    tags: ["Zirkus", "Familie", "Kinder"]
+  },
+  {
+    id: 9,
+    title: "Schlachte-Weinfest",
+    category: "food",
+    emoji: "🍷",
+    date: "2026-07-03",
+    time: "16:00",
+    location: "Schlachte",
+    address: "Schlachte, 28195 Bremen",
+    desc: "Feinste Weine aus deutschen Anbaugebieten direkt am Weserufer – mit Live-Musik und regionalen Speisen.",
+    price: 0,
+    tags: ["Wein", "Kulinarik", "Open Air"]
+  },
+  {
+    id: 10,
+    title: "Samba-Festival Bremen",
+    category: "festival",
+    emoji: "🥁",
+    date: "2026-07-31",
+    time: "12:00",
+    location: "Innenstadt Bremen",
+    address: "Marktplatz & Sögestraße, 28195 Bremen",
+    desc: "Europas größtes Sambafestival – 100+ Bands, 3 Tage Straßenparade durch die Bremer Innenstadt.",
+    price: 0,
+    tags: ["Samba", "Parade", "Straßenfest"]
+  },
+  {
+    id: 11,
+    title: "Philharmoniker Bremen – Sinfoniekonzert",
+    category: "musik",
+    emoji: "🎶",
+    date: "2026-06-26",
+    time: "20:00",
+    location: "Die Glocke",
+    address: "Domsheide 6-8, 28195 Bremen",
+    desc: "Brahms 4. Sinfonie und Dvořáks Cellokonzert mit Solistin Harriet Krijgh – ein unvergesslicher Abend.",
+    price: 32,
+    tags: ["Sinfonie", "Klassik"]
+  },
+  {
+    id: 12,
+    title: "Kunsthalle: Impressionismus pur",
+    category: "kultur",
+    emoji: "🖼️",
+    date: "2026-06-01",
+    time: "10:00",
+    location: "Kunsthalle Bremen",
+    address: "Am Wall 207, 28195 Bremen",
+    desc: "Eine der bedeutendsten Impressionismus-Sammlungen Deutschlands – Monet, Pissarro und Liebermann.",
+    price: 11,
+    tags: ["Kunst", "Impressionismus", "Museum"]
+  },
+  {
+    id: 13,
+    title: "Open-Air Kino am Weserufer",
+    category: "kultur",
+    emoji: "🎬",
+    date: "2026-07-15",
+    time: "21:30",
+    location: "Weserstrand",
+    address: "Osterdeich, 28203 Bremen",
+    desc: "Kino unter Sternenhimmel – internationale Filmauswahl auf der großen Leinwand direkt an der Weser.",
+    price: 9,
+    tags: ["Kino", "Open Air", "Film"]
+  },
+  {
+    id: 14,
+    title: "Bremer Stadtmusikanten-Lauf",
+    category: "sport",
+    emoji: "🏃",
+    date: "2026-06-28",
+    time: "09:00",
+    location: "Start: Marktplatz",
+    address: "Marktplatz, 28195 Bremen",
+    desc: "Volkslauf durch die Bremer Innenstadt – 5 km, 10 km und Halbmarathon für Läuferinnen und Läufer aller Levels.",
+    price: 15,
+    tags: ["Lauf", "Sport", "Stadtlauf"]
+  },
+  {
+    id: 15,
+    title: "Kindertheater: Die Bremer Stadtmusikanten",
+    category: "kinder",
+    emoji: "🐴",
+    date: "2026-06-21",
+    time: "11:00",
+    location: "Bremer Shakespeare Company",
+    address: "Schulstr. 26, 28199 Bremen",
+    desc: "Das Bremer Grimm-Märchen auf der Bühne – bunt, witzig und interaktiv für Kinder von 4 bis 10 Jahren.",
+    price: 8,
+    tags: ["Märchen", "Kinder", "Theater"]
+  },
+  {
+    id: 16,
+    title: "Streetfood Festival Bremen",
+    category: "food",
+    emoji: "🌮",
+    date: "2026-07-10",
+    time: "12:00",
+    location: "Bürgerpark",
+    address: "Bismarckallee, 28209 Bremen",
+    desc: "50+ Food-Trucks aus aller Welt – Mexiko, Japan, Äthiopien und mehr. Essen und Live-Musik im schönen Bürgerpark.",
+    price: 0,
+    tags: ["Streetfood", "International", "Bürgerpark"]
+  },
+  {
+    id: 17,
+    title: "Rock am Weser – Open Air",
+    category: "musik",
+    emoji: "🎸",
+    date: "2026-08-01",
+    time: "16:00",
+    location: "Osterdeich Open Stage",
+    address: "Osterdeich, 28203 Bremen",
+    desc: "Drei lokale Rock-Bands und ein Headliner aus Hamburg – ein heißer Sommerabend direkt an der Weser.",
+    price: 12,
+    tags: ["Rock", "Open Air", "Live-Musik"]
+  },
+  {
+    id: 18,
+    title: "Oper: La Traviata",
+    category: "theater",
+    emoji: "🎼",
+    date: "2026-07-04",
+    time: "19:00",
+    location: "Theater Bremen – Opernhaus",
+    address: "Goetheplatz 1-3, 28203 Bremen",
+    desc: "Verdis Meisterwerk in einer klassischen Inszenierung – mit dem Ensemble des Theater Bremen und Gastsolisten.",
+    price: 45,
+    tags: ["Oper", "Verdi", "Klassik"]
+  }
+];
+
+// ── State ────────────────────────────────────────────────────────────────────
+let activeCategory = "alle";
+let searchQuery = "";
+let sortOrder = "date";
+
+// ── Helpers ──────────────────────────────────────────────────────────────────
+function formatDate(dateStr) {
+  const d = new Date(dateStr + "T00:00:00");
+  return d.toLocaleDateString("de-DE", { weekday: "short", day: "2-digit", month: "long", year: "numeric" });
+}
+
+function formatPrice(price) {
+  if (price === 0) return "Eintritt frei";
+  return price.toLocaleString("de-DE", { style: "currency", currency: "EUR" });
+}
+
+// ── Render ───────────────────────────────────────────────────────────────────
+function render() {
+  let list = events.slice();
+
+  // Filter category
+  if (activeCategory !== "alle") {
+    list = list.filter(e => e.category === activeCategory);
+  }
+
+  // Search
+  if (searchQuery) {
+    const q = searchQuery.toLowerCase();
+    list = list.filter(e =>
+      e.title.toLowerCase().includes(q) ||
+      e.location.toLowerCase().includes(q) ||
+      e.desc.toLowerCase().includes(q) ||
+      (e.tags || []).some(t => t.toLowerCase().includes(q))
+    );
+  }
+
+  // Sort
+  list.sort((a, b) => {
+    if (sortOrder === "date") return a.date.localeCompare(b.date);
+    if (sortOrder === "name") return a.title.localeCompare(b.title);
+    if (sortOrder === "price-asc") return a.price - b.price;
+    if (sortOrder === "price-desc") return b.price - a.price;
+    return 0;
+  });
+
+  document.getElementById("event-count").textContent = list.length;
+
+  const grid = document.getElementById("grid");
+
+  if (list.length === 0) {
+    grid.innerHTML = `
+      <div class="empty">
+        <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+          <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
+        </svg>
+        <h2>Keine Veranstaltungen gefunden</h2>
+        <p>Versuche einen anderen Suchbegriff oder Filter.</p>
+      </div>`;
+    return;
+  }
+
+  grid.innerHTML = list.map(e => `
+    <div class="card">
+      <div class="card-img img-${e.category}">${e.emoji}</div>
+      <div class="card-body">
+        <span class="card-category cat-${e.category}">${categoryLabel(e.category)}</span>
+        <div class="card-title">${e.title}</div>
+        <div class="card-desc">${e.desc}</div>
+        <div class="card-meta">
+          <div class="meta-row">
+            <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/>
+            </svg>
+            ${formatDate(e.date)} · ${e.time} Uhr
+          </div>
+          <div class="meta-row">
+            <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/>
+            </svg>
+            ${e.location}
+          </div>
+        </div>
+      </div>
+      <div class="card-footer">
+        <span class="price ${e.price === 0 ? 'free' : ''}">${formatPrice(e.price)}</span>
+        <button class="btn-ticket" onclick="showDetail(${e.id})">Details</button>
+      </div>
+    </div>
+  `).join("");
+}
+
+function categoryLabel(cat) {
+  const map = { musik:"Musik", theater:"Theater", sport:"Sport", kultur:"Kultur",
+                festival:"Festival", kinder:"Kinder", food:"Food & Drink", comedy:"Comedy" };
+  return map[cat] || cat;
+}
+
+// ── Detail modal ─────────────────────────────────────────────────────────────
+function showDetail(id) {
+  const e = events.find(ev => ev.id === id);
+  if (!e) return;
+
+  const overlay = document.createElement("div");
+  overlay.style.cssText = `position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:1000;
+    display:flex;align-items:center;justify-content:center;padding:20px;`;
+
+  overlay.innerHTML = `
+    <div style="background:white;border-radius:16px;max-width:520px;width:100%;
+                box-shadow:0 20px 60px rgba(0,0,0,.3);overflow:hidden;">
+      <div class="card-img img-${e.category}" style="height:140px;font-size:3.5rem;
+           display:flex;align-items:center;justify-content:center;">${e.emoji}</div>
+      <div style="padding:24px;">
+        <span class="card-category cat-${e.category}" style="margin-bottom:10px;display:inline-block;">
+          ${categoryLabel(e.category)}
+        </span>
+        <h2 style="font-size:1.3rem;margin-bottom:10px;line-height:1.3;">${e.title}</h2>
+        <p style="color:#6b7280;font-size:0.9rem;line-height:1.6;margin-bottom:16px;">${e.desc}</p>
+        <div style="display:flex;flex-direction:column;gap:8px;font-size:0.88rem;color:#374151;
+                    background:#f9fafb;border-radius:10px;padding:14px;margin-bottom:16px;">
+          <div style="display:flex;gap:8px;align-items:flex-start;">
+            <span>📅</span>
+            <span><strong>${formatDate(e.date)}</strong> um <strong>${e.time} Uhr</strong></span>
+          </div>
+          <div style="display:flex;gap:8px;">
+            <span>📍</span>
+            <span><strong>${e.location}</strong><br><span style="color:#6b7280;font-size:0.82rem;">${e.address}</span></span>
+          </div>
+          <div style="display:flex;gap:8px;align-items:center;">
+            <span>🎟️</span>
+            <span><strong class="${e.price===0?'price free':'price'}">${formatPrice(e.price)}</strong></span>
+          </div>
+          ${e.tags?.length ? `<div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:4px;">
+            ${e.tags.map(t=>`<span style="background:#e5e7eb;border-radius:12px;padding:2px 8px;font-size:0.78rem;">${t}</span>`).join("")}
+          </div>` : ""}
+        </div>
+        <div style="display:flex;gap:10px;">
+          <button onclick="this.closest('[style*=fixed]').remove()"
+            style="flex:1;padding:11px;border:1.5px solid #e5e7eb;border-radius:8px;
+                   background:white;cursor:pointer;font-size:0.9rem;">Schließen</button>
+          <button style="flex:1;padding:11px;background:#c0392b;color:white;border:none;
+                         border-radius:8px;cursor:pointer;font-size:0.9rem;font-weight:600;">
+            ${e.price === 0 ? "Mehr Info" : "Ticket kaufen"}
+          </button>
+        </div>
+      </div>
+    </div>`;
+
+  overlay.addEventListener("click", ev => { if (ev.target === overlay) overlay.remove(); });
+  document.body.appendChild(overlay);
+}
+
+// ── Events ───────────────────────────────────────────────────────────────────
+document.getElementById("search").addEventListener("input", e => {
+  searchQuery = e.target.value.trim();
+  render();
+});
+
+document.getElementById("sort").addEventListener("change", e => {
+  sortOrder = e.target.value;
+  render();
+});
+
+document.getElementById("filters").addEventListener("click", e => {
+  const btn = e.target.closest(".filter-btn");
+  if (!btn) return;
+  document.querySelectorAll(".filter-btn").forEach(b => b.classList.remove("active"));
+  btn.classList.add("active");
+  activeCategory = btn.dataset.cat;
+  render();
+});
+
+// ── Init ─────────────────────────────────────────────────────────────────────
+render();
+</script>
+</body>
+</html>
