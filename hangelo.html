@@ -1,0 +1,555 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Hangelo Singlebörse</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --pink: #d6336c;
+      --pink-dark: #b02555;
+      --bg: #f4f4f6;
+      --card: #ffffff;
+      --text: #1a1a2e;
+      --muted: #6b7280;
+      --border: #e5e7eb;
+      --shadow: 0 2px 8px rgba(0,0,0,0.08);
+    }
+
+    body {
+      font-family: 'Segoe UI', system-ui, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+    }
+
+    /* ── Header ── */
+    header {
+      background: var(--pink);
+      color: white;
+      padding: 0;
+    }
+
+    .header-top {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      padding: 20px 32px;
+      flex-wrap: wrap;
+    }
+
+    .header-top svg { flex-shrink: 0; }
+
+    .header-top h1 {
+      font-size: 1.75rem;
+      font-weight: 700;
+      letter-spacing: -0.5px;
+    }
+
+    .header-top p {
+      font-size: 0.9rem;
+      opacity: 0.85;
+      margin-top: 2px;
+    }
+
+    .header-link {
+      margin-left: auto;
+      color: white;
+      text-decoration: none;
+      font-size: 0.85rem;
+      border: 1.5px solid rgba(255,255,255,0.5);
+      padding: 6px 14px;
+      border-radius: 20px;
+      transition: background .15s;
+    }
+
+    .header-link:hover { background: rgba(255,255,255,0.15); }
+
+    /* ── Controls bar ── */
+    .controls {
+      background: white;
+      border-bottom: 1px solid var(--border);
+      padding: 16px 32px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      align-items: center;
+    }
+
+    .search-wrap {
+      position: relative;
+      flex: 1;
+      min-width: 220px;
+      max-width: 420px;
+    }
+
+    .search-wrap svg {
+      position: absolute;
+      left: 12px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--muted);
+      pointer-events: none;
+    }
+
+    #search {
+      width: 100%;
+      padding: 10px 12px 10px 38px;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      font-size: 0.95rem;
+      outline: none;
+      transition: border-color .2s;
+    }
+
+    #search:focus { border-color: var(--pink); }
+
+    .filters {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .filter-btn {
+      padding: 7px 14px;
+      border-radius: 20px;
+      border: 1.5px solid var(--border);
+      background: white;
+      font-size: 0.85rem;
+      cursor: pointer;
+      transition: all .15s;
+      color: var(--text);
+    }
+
+    .filter-btn:hover { border-color: var(--pink); color: var(--pink); }
+
+    .filter-btn.active {
+      background: var(--pink);
+      border-color: var(--pink);
+      color: white;
+    }
+
+    /* ── Toolbar ── */
+    .toolbar {
+      padding: 14px 32px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 0.9rem;
+      color: var(--muted);
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    #profile-count { font-weight: 600; color: var(--text); }
+
+    .sort-wrap select {
+      padding: 6px 10px;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      font-size: 0.85rem;
+      cursor: pointer;
+      outline: none;
+    }
+
+    /* ── Grid ── */
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+      gap: 20px;
+      padding: 0 32px 40px;
+    }
+
+    /* ── Card ── */
+    .card {
+      background: var(--card);
+      border-radius: 12px;
+      box-shadow: var(--shadow);
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      cursor: pointer;
+      transition: transform .2s, box-shadow .2s;
+    }
+
+    .card:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 8px 24px rgba(0,0,0,0.12);
+    }
+
+    .card-img {
+      height: 160px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 3.5rem;
+      background: linear-gradient(135deg, #fbd5e5, #fde4ea);
+      position: relative;
+    }
+
+    .online-dot {
+      position: absolute;
+      top: 12px;
+      right: 12px;
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      background: #22c55e;
+      border: 2px solid white;
+    }
+
+    .card-body { padding: 16px; flex: 1; display: flex; flex-direction: column; }
+
+    .card-name-row {
+      display: flex;
+      align-items: baseline;
+      gap: 6px;
+      margin-bottom: 4px;
+    }
+
+    .card-name { font-size: 1.05rem; font-weight: 700; }
+    .card-age { font-size: 0.9rem; color: var(--muted); }
+
+    .card-loc {
+      font-size: 0.8rem;
+      color: var(--muted);
+      margin-bottom: 10px;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .card-bio {
+      font-size: 0.85rem;
+      color: var(--muted);
+      line-height: 1.5;
+      flex: 1;
+      margin-bottom: 12px;
+    }
+
+    .card-tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-bottom: 4px;
+    }
+
+    .tag {
+      background: #fbe8ef;
+      color: var(--pink-dark);
+      font-size: 0.72rem;
+      padding: 3px 9px;
+      border-radius: 12px;
+    }
+
+    .card-footer {
+      padding: 12px 16px;
+      border-top: 1px solid var(--border);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .gender-badge {
+      font-size: 0.78rem;
+      color: var(--muted);
+    }
+
+    .btn-contact {
+      padding: 7px 14px;
+      background: var(--pink);
+      color: white;
+      border: none;
+      border-radius: 7px;
+      font-size: 0.82rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background .15s;
+    }
+
+    .btn-contact:hover { background: var(--pink-dark); }
+
+    /* ── Empty state ── */
+    .empty {
+      grid-column: 1 / -1;
+      text-align: center;
+      padding: 80px 20px;
+      color: var(--muted);
+    }
+
+    .empty svg { margin-bottom: 16px; opacity: .3; }
+    .empty h2 { font-size: 1.2rem; margin-bottom: 8px; color: var(--text); }
+
+    /* ── Footer ── */
+    footer {
+      text-align: center;
+      padding: 24px 16px;
+      font-size: 0.82rem;
+      color: var(--muted);
+      border-top: 1px solid var(--border);
+      margin-top: 8px;
+    }
+
+    footer a {
+      color: var(--pink);
+      text-decoration: none;
+    }
+
+    footer a:hover { text-decoration: underline; }
+
+    /* ── Responsive ── */
+    @media (max-width: 600px) {
+      .header-top { padding: 16px 16px; }
+      .controls { padding: 12px 16px; }
+      .toolbar { padding: 10px 16px; }
+      .grid { padding: 0 16px 32px; gap: 16px; }
+      .header-top h1 { font-size: 1.35rem; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ── Header ── -->
+<header>
+  <div class="header-top">
+    <svg width="48" height="48" viewBox="0 0 48 48" fill="none">
+      <rect width="48" height="48" rx="12" fill="rgba(255,255,255,0.15)"/>
+      <text x="24" y="34" text-anchor="middle" font-size="24">💘</text>
+    </svg>
+    <div>
+      <h1>Hangelo Singlebörse</h1>
+      <p>Lerne Singles aus Hangelo und Umgebung kennen</p>
+    </div>
+    <a class="header-link" href="index.html">🎉 Veranstaltungen Bremen</a>
+  </div>
+</header>
+
+<!-- ── Controls ── -->
+<div class="controls">
+  <div class="search-wrap">
+    <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+      <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
+    </svg>
+    <input id="search" type="text" placeholder="Suche nach Name, Interessen …" />
+  </div>
+  <div class="filters" id="filters">
+    <button class="filter-btn active" data-gender="alle">Alle</button>
+    <button class="filter-btn" data-gender="frau">Frauen</button>
+    <button class="filter-btn" data-gender="mann">Männer</button>
+    <button class="filter-btn" data-gender="divers">Divers</button>
+  </div>
+</div>
+
+<!-- ── Toolbar ── -->
+<div class="toolbar">
+  <span><span id="profile-count">0</span> Profile gefunden</span>
+  <div class="sort-wrap">
+    <select id="sort">
+      <option value="online">Sortieren: Online zuerst</option>
+      <option value="age-asc">Sortieren: Alter ↑</option>
+      <option value="age-desc">Sortieren: Alter ↓</option>
+      <option value="name">Sortieren: Name</option>
+      <option value="distance">Sortieren: Entfernung</option>
+    </select>
+  </div>
+</div>
+
+<!-- ── Grid ── -->
+<div class="grid" id="grid"></div>
+
+<script>
+// ── Data (Demo-/Mockprofile) ──────────────────────────────────────────────────
+const profiles = [
+  { id: 1, name: "Lena", age: 29, gender: "frau", avatar: "👩", online: true, distance: 2,
+    bio: "Kaffee, Buch, wiederholen. Suche jemanden für lange Spaziergänge und gute Gespräche.",
+    tags: ["Lesen", "Wandern", "Yoga"] },
+  { id: 2, name: "Tom", age: 34, gender: "mann", avatar: "🧑", online: false, distance: 5,
+    bio: "Handwerker mit Herz. Am liebsten grille ich am Wochenende mit Freunden.",
+    tags: ["Grillen", "Handball", "DIY"] },
+  { id: 3, name: "Mira", age: 26, gender: "frau", avatar: "👩‍🦰", online: true, distance: 1,
+    bio: "Tierärztin in Ausbildung. Hunde sind mein Leben – Katzen aber auch okay.",
+    tags: ["Tiere", "Reisen", "Fotografie"] },
+  { id: 4, name: "Jonas", age: 31, gender: "mann", avatar: "👨‍🦱", online: true, distance: 3,
+    bio: "Programmierer bei Tag, Hobbykoch bei Nacht. Suche jemanden zum gemeinsam Kochen.",
+    tags: ["Kochen", "Gaming", "Musik"] },
+  { id: 5, name: "Sina", age: 24, gender: "frau", avatar: "👱‍♀️", online: false, distance: 7,
+    bio: "Studentin, Kunst-Fan und immer für einen Museumsbesuch zu haben.",
+    tags: ["Kunst", "Museum", "Kaffee"] },
+  { id: 6, name: "Alex", age: 28, gender: "divers", avatar: "🧑‍🎤", online: true, distance: 4,
+    bio: "Musiker und Nachteule. Auf der Suche nach ehrlichen Gesprächen ohne Small Talk.",
+    tags: ["Musik", "Konzerte", "Kunst"] },
+  { id: 7, name: "Nico", age: 37, gender: "mann", avatar: "👨", online: false, distance: 6,
+    bio: "Familienmensch mit Hund. Suche eine ehrliche Verbindung fürs Leben.",
+    tags: ["Hund", "Familie", "Radfahren"] },
+  { id: 8, name: "Julia", age: 33, gender: "frau", avatar: "👩‍🦳", online: true, distance: 2,
+    bio: "Lehrerin, reist gerne und liebt gutes Essen. Humor ist mir sehr wichtig.",
+    tags: ["Reisen", "Essen", "Humor"] },
+  { id: 9, name: "Kim", age: 25, gender: "divers", avatar: "🧑‍🦱", online: true, distance: 8,
+    bio: "Fitness-Fan und Naturliebhaber. Am liebsten am Wochenende draußen unterwegs.",
+    tags: ["Fitness", "Natur", "Wandern"] },
+  { id: 10, name: "Marco", age: 40, gender: "mann", avatar: "🧔", online: false, distance: 9,
+    bio: "Selbstständig, bodenständig, humorvoll. Suche jemanden auf Augenhöhe.",
+    tags: ["Sport", "Motorrad", "Kochen"] },
+  { id: 11, name: "Anna", age: 22, gender: "frau", avatar: "👧", online: true, distance: 3,
+    bio: "Frisch in Bremen und offen für Neues. Tanzen ist meine große Leidenschaft.",
+    tags: ["Tanzen", "Musik", "Reisen"] },
+  { id: 12, name: "David", age: 29, gender: "mann", avatar: "👨‍🦲", online: true, distance: 1,
+    bio: "Feuerwehrmann und Naturbursche. Suche jemanden mit Bodenständigkeit und Humor.",
+    tags: ["Natur", "Sport", "Angeln"] }
+];
+
+// ── State ────────────────────────────────────────────────────────────────────
+let activeGender = "alle";
+let searchQuery = "";
+let sortOrder = "online";
+
+// ── Render ───────────────────────────────────────────────────────────────────
+function render() {
+  let list = profiles.slice();
+
+  if (activeGender !== "alle") {
+    list = list.filter(p => p.gender === activeGender);
+  }
+
+  if (searchQuery) {
+    const q = searchQuery.toLowerCase();
+    list = list.filter(p =>
+      p.name.toLowerCase().includes(q) ||
+      p.bio.toLowerCase().includes(q) ||
+      (p.tags || []).some(t => t.toLowerCase().includes(q))
+    );
+  }
+
+  list.sort((a, b) => {
+    if (sortOrder === "online") return (b.online - a.online) || a.name.localeCompare(b.name);
+    if (sortOrder === "age-asc") return a.age - b.age;
+    if (sortOrder === "age-desc") return b.age - a.age;
+    if (sortOrder === "name") return a.name.localeCompare(b.name);
+    if (sortOrder === "distance") return a.distance - b.distance;
+    return 0;
+  });
+
+  document.getElementById("profile-count").textContent = list.length;
+
+  const grid = document.getElementById("grid");
+
+  if (list.length === 0) {
+    grid.innerHTML = `
+      <div class="empty">
+        <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+          <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
+        </svg>
+        <h2>Keine Profile gefunden</h2>
+        <p>Versuche einen anderen Suchbegriff oder Filter.</p>
+      </div>`;
+    return;
+  }
+
+  grid.innerHTML = list.map(p => `
+    <div class="card" onclick="showDetail(${p.id})">
+      <div class="card-img">
+        ${p.avatar}
+        ${p.online ? '<span class="online-dot" title="Online"></span>' : ''}
+      </div>
+      <div class="card-body">
+        <div class="card-name-row">
+          <span class="card-name">${p.name}</span>
+          <span class="card-age">${p.age}</span>
+        </div>
+        <div class="card-loc">📍 Hangelo · ${p.distance} km entfernt</div>
+        <div class="card-bio">${p.bio}</div>
+        <div class="card-tags">
+          ${p.tags.map(t => `<span class="tag">${t}</span>`).join("")}
+        </div>
+      </div>
+      <div class="card-footer">
+        <span class="gender-badge">${genderLabel(p.gender)}</span>
+        <button class="btn-contact" onclick="event.stopPropagation(); showDetail(${p.id})">Kontakt aufnehmen</button>
+      </div>
+    </div>
+  `).join("");
+}
+
+function genderLabel(g) {
+  const map = { frau: "Frau", mann: "Mann", divers: "Divers" };
+  return map[g] || g;
+}
+
+// ── Detail modal ─────────────────────────────────────────────────────────────
+function showDetail(id) {
+  const p = profiles.find(pr => pr.id === id);
+  if (!p) return;
+
+  const overlay = document.createElement("div");
+  overlay.style.cssText = `position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:1000;
+    display:flex;align-items:center;justify-content:center;padding:20px;`;
+
+  overlay.innerHTML = `
+    <div style="background:white;border-radius:16px;max-width:480px;width:100%;
+                box-shadow:0 20px 60px rgba(0,0,0,.3);overflow:hidden;">
+      <div style="height:150px;font-size:4rem;background:linear-gradient(135deg,#fbd5e5,#fde4ea);
+                  display:flex;align-items:center;justify-content:center;">${p.avatar}</div>
+      <div style="padding:24px;">
+        <h2 style="font-size:1.3rem;margin-bottom:4px;">${p.name}, ${p.age}</h2>
+        <p style="color:#6b7280;font-size:0.85rem;margin-bottom:14px;">
+          📍 Hangelo · ${p.distance} km entfernt ${p.online ? "· 🟢 Online" : ""}
+        </p>
+        <p style="color:#374151;font-size:0.9rem;line-height:1.6;margin-bottom:16px;">${p.bio}</p>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:20px;">
+          ${p.tags.map(t => `<span class="tag">${t}</span>`).join("")}
+        </div>
+        <div style="display:flex;gap:10px;">
+          <button onclick="this.closest('[style*=fixed]').remove()"
+            style="flex:1;padding:11px;border:1.5px solid #e5e7eb;border-radius:8px;
+                   background:white;cursor:pointer;font-size:0.9rem;">Schließen</button>
+          <button onclick="sendMessage('${p.name.replace(/'/g, "\\'")}')"
+            style="flex:1;padding:11px;background:#d6336c;color:white;border:none;
+                   border-radius:8px;cursor:pointer;font-size:0.9rem;font-weight:600;">
+            Nachricht senden
+          </button>
+        </div>
+      </div>
+    </div>`;
+
+  overlay.addEventListener("click", ev => { if (ev.target === overlay) overlay.remove(); });
+  document.body.appendChild(overlay);
+}
+
+function sendMessage(name) {
+  alert(`Demo-Version: Nachrichten an ${name} sind hier noch nicht mit echtem Versand verknüpft.`);
+}
+
+// ── Events ───────────────────────────────────────────────────────────────────
+document.getElementById("search").addEventListener("input", e => {
+  searchQuery = e.target.value.trim();
+  render();
+});
+
+document.getElementById("sort").addEventListener("change", e => {
+  sortOrder = e.target.value;
+  render();
+});
+
+document.getElementById("filters").addEventListener("click", e => {
+  const btn = e.target.closest(".filter-btn");
+  if (!btn) return;
+  document.querySelectorAll(".filter-btn").forEach(b => b.classList.remove("active"));
+  btn.classList.add("active");
+  activeGender = btn.dataset.gender;
+  render();
+});
+
+// ── Init ─────────────────────────────────────────────────────────────────────
+render();
+</script>
+
+<footer>
+  &copy; <span id="year"></span> &ndash;
+  programmiert von <a href="https://frank-panzer.de" target="_blank" rel="noopener">Frank Panzer</a>
+  &ndash; <a href="https://panzerit.de" target="_blank" rel="noopener">Panzer IT</a>
+</footer>
+<script>document.getElementById("year").textContent = new Date().getFullYear();</script>
+</body>
+</html>

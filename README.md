@@ -28,6 +28,12 @@ cd veranstaltungen-Bremen
 
 Oder direkt online aufrufen: **[bc24.github.io/veranstaltungen-Bremen](https://bc24.github.io/veranstaltungen-Bremen)**
 
+## Hangelo Singlebörse
+
+Zusätzlich enthält das Repo `hangelo.html` – eine Demo-Singlebörse für Hangelo mit
+Mock-Profilen, Filter nach Geschlecht, Volltextsuche, Sortierung und Detailansicht.
+Reines Frontend ohne Backend, es werden keine echten Nachrichten versendet.
+
 ## Technologie
 
 - Reines HTML, CSS und JavaScript
