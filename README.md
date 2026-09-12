@@ -7,14 +7,18 @@ nach redaktioneller Prüfung im Admin-Bereich veröffentlicht.
 
 ## Architektur
 
-- **Frontend**: React (Vite) + React Router, Kartenansicht mit React-Leaflet/OpenStreetMap
-- **Backend**: Node.js + Express, ORM Sequelize
-- **Datenbank**: MySQL/MariaDB
+- **Laufzeitumgebung**: Apache 2 + PHP 8.1+ (klassischer Server-Side-Rendering-Stack, kein Build-Schritt)
+- **Datenbank**: MySQL/MariaDB, Zugriff über PDO (prepared statements)
+- **Karte**: Leaflet + OpenStreetMap, eingebunden per CDN
 - **Zahlungen**: Stripe Checkout (Testmodus-Keys erforderlich, eigene Keys in `.env` eintragen)
+- **Admin-Auth**: PHP-Sessions + `password_hash`/`password_verify`, CSRF-Token auf allen Formularen
 
 ```
-backend/    Express-API, Sequelize-Modelle, Stripe-Integration, Admin-Auth (JWT)
-frontend/   React-App: Verzeichnis mit Karte/Liste/Filter, Einreichungs-Formular, Admin-Panel
+public/         Apache-DocumentRoot: alle aufrufbaren Seiten (index.php, einreichen.php, admin/, api/, payments/)
+src/            PHP-Klassen: Database, Market, Auth, Payments (Composer-Autoload)
+config/         .env-Loader
+sql/schema.sql  Datenbankschema
+bin/seed.php    Legt Admin-Konto + Beispiel-Märkte an
 ```
 
 ## Datenmodell
@@ -25,60 +29,61 @@ Ein Markt (`markets`) durchläuft folgenden Lebenszyklus:
 pending_payment  →  (Stripe-Zahlung erfolgreich, per Webhook)  →  pending_review  →  published | rejected
 ```
 
-Ohne bezahlten Status (`paymentStatus = paid`) kann ein Eintrag nicht veröffentlicht werden – das
-setzt technisch um, dass es keinen kostenlosen Pfad ins Verzeichnis gibt.
+`Market::updateStatus()` verweigert die Veröffentlichung serverseitig, solange `payment_status`
+nicht `paid` ist – es gibt also technisch keinen kostenlosen Weg ins Verzeichnis.
 
 ## Lokales Setup
 
 ### 1. Datenbank
 
-MariaDB per Docker starten (oder eine bestehende MySQL/MariaDB-Instanz verwenden):
+MariaDB per Docker starten (oder eine bestehende MySQL/MariaDB-Instanz verwenden) und Schema importieren:
 
 ```bash
 docker compose up -d
+mysql -h 127.0.0.1 -u root -p market_directory < sql/schema.sql
 ```
 
-### 2. Backend
+### 2. Konfiguration & Abhängigkeiten
 
 ```bash
-cd backend
 cp .env.example .env
-# .env ausfüllen: DB-Zugang, JWT_SECRET, ADMIN_EMAIL/ADMIN_PASSWORD,
+# .env ausfüllen: DB-Zugang, APP_URL, ADMIN_EMAIL/ADMIN_PASSWORD,
 # STRIPE_SECRET_KEY & STRIPE_WEBHOOK_SECRET (aus dem Stripe-Dashboard, Testmodus)
-npm install
-npm run seed   # legt Admin-Konto + Beispiel-Märkte an
-npm run dev    # startet die API auf Port 4000
+composer install
+php bin/seed.php   # legt Admin-Konto + Beispiel-Märkte an
 ```
+
+### 3. Server starten
+
+**Für lokale Entwicklung** (PHP-eigener Server, kein Apache nötig):
+
+```bash
+php -S localhost:8080 -t public
+```
+
+**Für den produktiven Betrieb mit Apache 2**: `public/` als `DocumentRoot` eines VHosts eintragen,
+`mod_php` oder `php-fpm` (mit `mod_proxy_fcgi`) aktivieren. Eine `.htaccess` in `public/` sperrt
+`.env`, `.sql` und `.md`-Dateien.
+
+Admin-Bereich: `http://localhost:8080/admin/login.php` (Zugangsdaten aus `ADMIN_EMAIL`/`ADMIN_PASSWORD`).
 
 Stripe-Webhooks lokal testen mit der Stripe CLI:
 
 ```bash
-stripe listen --forward-to localhost:4000/api/payments/webhook
+stripe listen --forward-to localhost:8080/payments/webhook.php
 ```
 
-### 3. Frontend
+## Seiten-Übersicht
 
-```bash
-cd frontend
-npm install
-npm run dev    # startet die App auf Port 5173, proxyt /api an das Backend
-```
-
-Admin-Bereich: `http://localhost:5173/admin` (Zugangsdaten aus `ADMIN_EMAIL`/`ADMIN_PASSWORD`).
-
-## API-Übersicht
-
-| Methode | Pfad | Zugriff | Zweck |
-|---|---|---|---|
-| GET | `/api/markets` | öffentlich | Veröffentlichte Märkte, Filter über Query-Parameter (`category`, `city`, `from`, `to`, `q`) |
-| GET | `/api/markets/:id` | öffentlich | Einzelner veröffentlichter Markt |
-| POST | `/api/markets` | öffentlich | Neuen Markteintrag anlegen (Status `pending_payment`) |
-| POST | `/api/payments/create-checkout-session` | öffentlich | Stripe-Checkout-Session für einen Eintrag erstellen |
-| POST | `/api/payments/webhook` | Stripe | Zahlungsbestätigung, setzt Eintrag auf `pending_review` |
-| POST | `/api/admin/login` | öffentlich | Admin-Login, liefert JWT |
-| GET | `/api/admin/markets` | Admin | Alle Einträge, optional gefiltert nach `status` |
-| PATCH | `/api/admin/markets/:id` | Admin | Veröffentlichen/Ablehnen |
-| DELETE | `/api/admin/markets/:id` | Admin | Eintrag löschen |
+| Pfad | Zugriff | Zweck |
+|---|---|---|
+| `/index.php` | öffentlich | Verzeichnis: Karte + Liste, Filter über GET-Parameter (`category`, `city`, `from`, `to`, `q`) |
+| `/api/markets.php` | öffentlich | JSON-Export der veröffentlichten Märkte (gleiche Filter) |
+| `/einreichen.php` | öffentlich | Formular für neue Markteinträge, leitet zu Stripe Checkout weiter |
+| `/einreichen-erfolg.php`, `/einreichen-abgebrochen.php` | öffentlich | Rückkehrseiten von Stripe |
+| `/payments/webhook.php` | Stripe | Zahlungsbestätigung, setzt Eintrag auf `pending_review` |
+| `/admin/login.php`, `/admin/logout.php` | öffentlich | Admin-Anmeldung |
+| `/admin/dashboard.php` | Admin (Session) | Kuratierung: veröffentlichen, ablehnen, löschen |
 
 ## Lizenz
 

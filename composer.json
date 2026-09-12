@@ -1,0 +1,13 @@
+{
+    "name": "bc24/marktverzeichnis",
+    "description": "Kuratiertes Verzeichnis lokaler Maerkte (PHP/Apache/MariaDB)",
+    "type": "project",
+    "require": {
+        "php": ">=8.1",
+        "ext-pdo": "*",
+        "stripe/stripe-php": "^16.0"
+    },
+    "autoload": {
+        "classmap": ["src/"]
+    }
+}
