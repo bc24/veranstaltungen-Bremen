@@ -1,0 +1,271 @@
+/* =========================================================
+   Trockenheld – Stylesheet
+   ========================================================= */
+
+:root {
+    --gruen-dunkel: #0b6e52;
+    --gruen: #0f9d78;
+    --gruen-hell: #d3f2e6;
+    --amber: #f2a541;
+    --amber-dunkel: #c9791a;
+    --rot: #d9534f;
+    --text: #1f2a28;
+    --text-mild: #5a6b67;
+    --bg: #f6f9f8;
+    --card-bg: #ffffff;
+    --border: #e1e9e6;
+    --radius: 16px;
+    --shadow: 0 4px 18px rgba(15, 61, 46, 0.08);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+}
+
+* { box-sizing: border-box; }
+
+body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.5;
+}
+
+.container {
+    max-width: 1080px;
+    margin: 0 auto;
+    padding: 0 20px;
+}
+
+a { color: var(--gruen-dunkel); text-decoration: none; }
+a:hover { text-decoration: underline; }
+
+/* ---------- Header ---------- */
+.site-header {
+    background: var(--card-bg);
+    border-bottom: 1px solid var(--border);
+}
+.header-inner {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    padding: 14px 20px;
+}
+.logo {
+    font-size: 1.3rem;
+    font-weight: 800;
+    color: var(--gruen-dunkel);
+    text-decoration: none;
+}
+.logo-icon { margin-right: 4px; }
+.main-nav { display: flex; align-items: center; gap: 18px; flex-wrap: wrap; }
+.main-nav a { color: var(--text); font-weight: 600; text-decoration: none; font-size: 0.95rem; }
+.main-nav a:hover { color: var(--gruen-dunkel); }
+.nav-cta {
+    background: var(--gruen);
+    color: #fff !important;
+    padding: 8px 16px;
+    border-radius: 999px;
+}
+.nav-cta:hover { background: var(--gruen-dunkel); }
+
+/* ---------- Layout ---------- */
+.main-content { padding: 32px 20px 60px; min-height: 60vh; }
+
+.flash { padding: 12px 16px; border-radius: 10px; margin-bottom: 20px; font-weight: 600; }
+.flash-erfolg { background: var(--gruen-hell); color: var(--gruen-dunkel); }
+.flash-fehler { background: #fbe4e3; color: var(--rot); }
+.flash-info { background: #fff3de; color: var(--amber-dunkel); }
+
+/* ---------- Cards ---------- */
+.card {
+    background: var(--card-bg);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    padding: 28px;
+    margin-bottom: 24px;
+    border: 1px solid var(--border);
+}
+.card h2, .card h3 { margin-top: 0; }
+
+.grid { display: grid; gap: 24px; }
+.grid-2 { grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); }
+.grid-3 { grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); }
+
+/* ---------- Hero / Start ---------- */
+.hero { text-align: center; padding: 60px 20px; }
+.hero h1 { font-size: 2.6rem; margin-bottom: 12px; color: var(--gruen-dunkel); }
+.hero p { font-size: 1.15rem; color: var(--text-mild); max-width: 600px; margin: 0 auto 28px; }
+.hero-actions { display: flex; gap: 14px; justify-content: center; flex-wrap: wrap; }
+
+.stufen-uebersicht { display: flex; gap: 16px; justify-content: center; flex-wrap: wrap; margin-top: 40px; }
+.stufe-badge {
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 20px;
+    width: 150px;
+    text-align: center;
+    box-shadow: var(--shadow);
+}
+.stufe-badge .stufe-icon { font-size: 2rem; }
+.stufe-badge .stufe-punkte { color: var(--amber-dunkel); font-weight: 700; }
+
+/* ---------- Buttons ---------- */
+.btn {
+    display: inline-block;
+    border: none;
+    border-radius: 10px;
+    padding: 12px 22px;
+    font-size: 1rem;
+    font-weight: 700;
+    cursor: pointer;
+    text-decoration: none;
+    text-align: center;
+}
+.btn-primary { background: var(--gruen); color: #fff; }
+.btn-primary:hover { background: var(--gruen-dunkel); color: #fff; text-decoration: none; }
+.btn-secondary { background: var(--gruen-hell); color: var(--gruen-dunkel); }
+.btn-secondary:hover { background: #c1e8d7; text-decoration: none; }
+.btn-outline { background: transparent; border: 2px solid var(--gruen); color: var(--gruen-dunkel); }
+.btn-block { width: 100%; }
+.btn-lg { padding: 18px 30px; font-size: 1.1rem; }
+
+/* ---------- Check-in Button ---------- */
+.checkin-box { text-align: center; padding: 20px; }
+.checkin-button {
+    width: 200px;
+    height: 200px;
+    border-radius: 50%;
+    border: none;
+    background: linear-gradient(145deg, var(--gruen), var(--gruen-dunkel));
+    color: #fff;
+    font-size: 1.15rem;
+    font-weight: 800;
+    cursor: pointer;
+    box-shadow: 0 10px 30px rgba(15, 157, 120, 0.35);
+    transition: transform 0.15s ease;
+}
+.checkin-button:hover { transform: scale(1.04); }
+.checkin-button:active { transform: scale(0.98); }
+.checkin-button.erledigt {
+    background: linear-gradient(145deg, #a9c8bd, #86a89b);
+    cursor: default;
+    box-shadow: none;
+}
+.checkin-button.erledigt:hover { transform: none; }
+
+.streak-zahl { font-size: 3rem; font-weight: 800; color: var(--gruen-dunkel); }
+.streak-label { color: var(--text-mild); font-weight: 600; }
+
+/* ---------- Kalender / Logbuch ---------- */
+.kalender {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 6px;
+    margin-top: 16px;
+}
+.kalender-tag {
+    aspect-ratio: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 8px;
+    font-size: 1.1rem;
+    background: var(--bg);
+    border: 1px solid var(--border);
+}
+.kalender-tag.ok { background: var(--gruen-hell); }
+.kalender-tag.fehlt { background: #fbe4e3; opacity: 0.6; }
+.kalender-tag.zukunft { background: transparent; border-style: dashed; opacity: 0.4; }
+
+/* ---------- Meilensteine / Badges ---------- */
+.meilenstein-liste { display: flex; gap: 16px; flex-wrap: wrap; }
+.meilenstein {
+    flex: 1 1 140px;
+    text-align: center;
+    padding: 18px 10px;
+    border-radius: 12px;
+    border: 1px solid var(--border);
+    background: var(--bg);
+}
+.meilenstein.erreicht { background: #fff8ea; border-color: var(--amber); }
+.meilenstein .icon { font-size: 1.8rem; }
+.meilenstein .punkte { color: var(--amber-dunkel); font-weight: 700; font-size: 0.9rem; }
+
+/* ---------- Profil ---------- */
+.profil-kopf { display: flex; gap: 20px; align-items: center; flex-wrap: wrap; }
+.avatar {
+    width: 84px;
+    height: 84px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #fff;
+    font-size: 2rem;
+    font-weight: 800;
+    flex-shrink: 0;
+}
+.avatar.klein { width: 40px; height: 40px; font-size: 1.1rem; }
+.profil-stats { display: flex; gap: 28px; margin-top: 18px; flex-wrap: wrap; }
+.profil-stats .stat-wert { font-size: 1.8rem; font-weight: 800; color: var(--gruen-dunkel); }
+.profil-stats .stat-label { color: var(--text-mild); font-size: 0.9rem; }
+
+/* ---------- Mitgliederliste ---------- */
+.mitglied-zeile {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 12px 0;
+    border-bottom: 1px solid var(--border);
+}
+.mitglied-zeile:last-child { border-bottom: none; }
+.mitglied-info { flex: 1; }
+.mitglied-info .name { font-weight: 700; }
+.mitglied-info .meta { color: var(--text-mild); font-size: 0.88rem; }
+
+/* ---------- Formulare ---------- */
+form .feld { margin-bottom: 18px; }
+label { display: block; font-weight: 700; margin-bottom: 6px; }
+input[type=text], input[type=email], input[type=password], input[type=date],
+input[type=number], textarea, select {
+    width: 100%;
+    padding: 11px 14px;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    font-size: 1rem;
+    background: #fff;
+    color: var(--text);
+}
+textarea { resize: vertical; min-height: 90px; }
+.hilfetext { color: var(--text-mild); font-size: 0.85rem; margin-top: 4px; }
+.checkbox-feld { display: flex; align-items: flex-start; gap: 10px; }
+.checkbox-feld input { margin-top: 4px; }
+.form-schmal { max-width: 480px; margin: 0 auto; }
+
+/* ---------- Footer ---------- */
+.site-footer {
+    background: var(--gruen-dunkel);
+    color: #dff2ea;
+    margin-top: 40px;
+}
+.footer-inner {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 22px 20px;
+    flex-wrap: wrap;
+    gap: 10px;
+    font-size: 0.9rem;
+}
+.footer-nav a { color: #dff2ea; margin-left: 16px; text-decoration: underline; }
+
+/* ---------- Utility ---------- */
+.text-center { text-align: center; }
+.mt-0 { margin-top: 0; }
+.muted { color: var(--text-mild); }
+
+@media (max-width: 600px) {
+    .hero h1 { font-size: 2rem; }
+    .checkin-button { width: 160px; height: 160px; font-size: 1rem; }
+    .profil-kopf { flex-direction: column; text-align: center; }
+}
