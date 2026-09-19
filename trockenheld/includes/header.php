@@ -18,6 +18,7 @@ $titel = isset($seitentitel) ? $seitentitel . ' – ' . APP_NAME : APP_NAME . ' 
 <title><?= h($titel) ?></title>
 <meta name="description" content="Trockenheld – die Web-App für deine Challenge ohne Alkohol. Täglich einchecken, Streaks sammeln, Meilensteine feiern.">
 <link rel="stylesheet" href="<?= h(APP_URL) ?>assets/css/style.css">
+<script src="<?= h(APP_URL) ?>assets/js/app.js" defer></script>
 </head>
 <body>
 <header class="site-header">

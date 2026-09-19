@@ -81,4 +81,19 @@ CREATE TABLE IF NOT EXISTS belohnungen (
         REFERENCES meilensteine(id) ON DELETE SET NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
+-- ---------------------------------------------------------------------
+-- Tabelle: rueckfaelle  ("Ich habe getrunken" – Punktabzug & Streak-Reset)
+-- ---------------------------------------------------------------------
+CREATE TABLE IF NOT EXISTS rueckfaelle (
+    id                  INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    benutzer_id         INT UNSIGNED NOT NULL,
+    rueckfall_datum     DATE NOT NULL,
+    punkte_abgezogen    INT NOT NULL,
+    notiz               VARCHAR(255) NULL,
+    erstellt_am         DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    UNIQUE KEY uq_benutzer_tag (benutzer_id, rueckfall_datum),
+    CONSTRAINT fk_rueckfaelle_benutzer FOREIGN KEY (benutzer_id)
+        REFERENCES benutzer(id) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
 SET FOREIGN_KEY_CHECKS = 1;

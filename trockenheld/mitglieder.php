@@ -25,7 +25,11 @@ require __DIR__ . '/includes/header.php';
             <div style="width:28px;text-align:center;font-weight:700;color:var(--text-mild);"><?= $i + 1 ?></div>
             <div class="avatar klein" style="background: <?= h($m['avatar_farbe']) ?>;"><?= h(avatar_initiale($m)) ?></div>
             <div class="mitglied-info">
-                <div class="name"><a href="profil.php?id=<?= (int) $m['id'] ?>"><?= h($m['anzeigename'] ?: $m['benutzername']) ?></a></div>
+                <div class="name">
+                    <a href="profil.php?id=<?= (int) $m['id'] ?>"><?= h($m['anzeigename'] ?: $m['benutzername']) ?></a>
+                    <?php $lvl = level_info((int) $m['punkte']); ?>
+                    <span class="hilfetext">Lvl <?= (int) $lvl['level'] ?> · <?= h($lvl['titel']) ?></span>
+                </div>
                 <div class="meta">
                     🔥 <?= (int) $m['aktueller_streak'] ?> Tage aktuell ·
                     🏆 <?= (int) $m['laengster_streak'] ?> Tage Rekord ·

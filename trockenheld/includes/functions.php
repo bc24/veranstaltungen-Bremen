@@ -18,6 +18,90 @@ const MEILENSTEINE = [
     'jahr'     => ['tage' => 365, 'punkte' => 3000, 'label' => 'Ein ganzes Jahr'],
 ];
 
+// Tages-Bonus: Je länger die aktuelle Serie, desto mehr Punkte gibt es pro
+// Tag ("Combo"-Mechanik). Absteigend sortiert nach Mindest-Streak-Tag.
+const PUNKTE_STUFEN = [
+    ['ab_tag' => 365, 'punkte' => 50, 'icon' => '👑', 'label' => 'Legenden-Modus'],
+    ['ab_tag' => 182, 'punkte' => 30, 'icon' => '💎', 'label' => 'Diamant-Serie'],
+    ['ab_tag' => 30,  'punkte' => 20, 'icon' => '🔥', 'label' => 'Feuer-Serie'],
+    ['ab_tag' => 7,   'punkte' => 15, 'icon' => '⚡', 'label' => 'Powerstreak'],
+    ['ab_tag' => 1,   'punkte' => 10, 'icon' => '🌱', 'label' => 'Start-Bonus'],
+];
+
+// Punktabzug, wenn ein Rückfall gemeldet wird – bewusst deutlich höher als
+// der tägliche Gewinn, damit sich das Durchhalten spürbar mehr lohnt.
+const RUECKFALL_PUNKTE_ABZUG = 150;
+
+// Level-System: Titel richten sich nach den insgesamt gesammelten Punkten.
+const LEVEL_STUFEN = [
+    ['ab_punkte' => 0,     'titel' => 'Trocken-Neuling'],
+    ['ab_punkte' => 150,   'titel' => 'Durchhalter'],
+    ['ab_punkte' => 500,   'titel' => 'Kämpfer'],
+    ['ab_punkte' => 1200,  'titel' => 'Krieger'],
+    ['ab_punkte' => 3000,  'titel' => 'Champion'],
+    ['ab_punkte' => 6000,  'titel' => 'Meister'],
+    ['ab_punkte' => 12000, 'titel' => 'Trockenheld-Legende'],
+];
+
+function punkte_fuer_streak_tag(int $streakTag): int
+{
+    foreach (PUNKTE_STUFEN as $stufe) {
+        if ($streakTag >= $stufe['ab_tag']) {
+            return $stufe['punkte'];
+        }
+    }
+    return 10;
+}
+
+function stufe_fuer_streak_tag(int $streakTag): array
+{
+    foreach (PUNKTE_STUFEN as $stufe) {
+        if ($streakTag >= $stufe['ab_tag']) {
+            return $stufe;
+        }
+    }
+    return end(PUNKTE_STUFEN);
+}
+
+/**
+ * Liefert Level-Nummer, Titel, Fortschritt und Punkte bis zum nächsten
+ * Level für die Anzeige einer Fortschrittsleiste im Dashboard.
+ */
+function level_info(int $punkte): array
+{
+    $punkte = max(0, $punkte);
+    $anzahl = count(LEVEL_STUFEN);
+
+    $aktuellerIndex = 0;
+    foreach (LEVEL_STUFEN as $i => $stufe) {
+        if ($punkte >= $stufe['ab_punkte']) {
+            $aktuellerIndex = $i;
+        }
+    }
+
+    $aktuelleStufe = LEVEL_STUFEN[$aktuellerIndex];
+    $naechsteStufe = LEVEL_STUFEN[$aktuellerIndex + 1] ?? null;
+
+    if ($naechsteStufe === null) {
+        $fortschrittProzent = 100;
+        $fehlendePunkte = 0;
+    } else {
+        $spanne = $naechsteStufe['ab_punkte'] - $aktuelleStufe['ab_punkte'];
+        $erreicht = $punkte - $aktuelleStufe['ab_punkte'];
+        $fortschrittProzent = $spanne > 0 ? (int) round(min(100, max(0, $erreicht / $spanne * 100))) : 100;
+        $fehlendePunkte = $naechsteStufe['ab_punkte'] - $punkte;
+    }
+
+    return [
+        'level'               => $aktuellerIndex + 1,
+        'titel'               => $aktuelleStufe['titel'],
+        'naechster_titel'     => $naechsteStufe['titel'] ?? null,
+        'fortschritt_prozent' => $fortschrittProzent,
+        'fehlende_punkte'     => $fehlendePunkte,
+        'ist_max_level'       => $naechsteStufe === null,
+    ];
+}
+
 function h(?string $text): string
 {
     return htmlspecialchars($text ?? '', ENT_QUOTES, 'UTF-8');
@@ -119,18 +203,30 @@ function hat_heute_eingecheckt(PDO $pdo, int $benutzerId): bool
     return (bool) $stmt->fetchColumn();
 }
 
+function hat_heute_rueckfall(PDO $pdo, int $benutzerId): bool
+{
+    $stmt = $pdo->prepare('SELECT 1 FROM rueckfaelle WHERE benutzer_id = ? AND rueckfall_datum = CURDATE()');
+    $stmt->execute([$benutzerId]);
+    return (bool) $stmt->fetchColumn();
+}
+
 /**
  * Trägt den heutigen Check-in ein, aktualisiert den Streak und vergibt
- * ggf. neue Meilensteine samt Bonuspunkten.
+ * den Tages-Bonus sowie ggf. neue Meilensteine samt Bonuspunkten.
  *
- * @return array{streak:int, neue_meilensteine: array}
+ * @return array{streak:int, tagesbonus:int, neue_meilensteine: array, bereits_erledigt: bool}
  */
 function checkin_durchfuehren(PDO $pdo, array $benutzer, ?string $notiz): array
 {
     $heute = new DateTimeImmutable('today');
 
-    if (hat_heute_eingecheckt($pdo, $benutzer['id'])) {
-        return ['streak' => (int) $benutzer['aktueller_streak'], 'neue_meilensteine' => []];
+    if (hat_heute_eingecheckt($pdo, $benutzer['id']) || hat_heute_rueckfall($pdo, $benutzer['id'])) {
+        return [
+            'streak' => (int) $benutzer['aktueller_streak'],
+            'tagesbonus' => 0,
+            'neue_meilensteine' => [],
+            'bereits_erledigt' => true,
+        ];
     }
 
     $stmt = $pdo->prepare('INSERT INTO checkins (benutzer_id, checkin_datum, notiz) VALUES (?, CURDATE(), ?)');
@@ -148,8 +244,9 @@ function checkin_durchfuehren(PDO $pdo, array $benutzer, ?string $notiz): array
     $neuerLaengsterStreak = max((int) $benutzer['laengster_streak'], $neuerStreak);
     $streakStart = $heute->modify('-' . ($neuerStreak - 1) . ' day')->format('Y-m-d');
 
+    $tagesbonus = punkte_fuer_streak_tag($neuerStreak);
     $neueMeilensteine = [];
-    $neuePunkte = 0;
+    $neuePunkte = $tagesbonus;
 
     foreach (MEILENSTEINE as $typ => $daten) {
         if ($neuerStreak === $daten['tage']) {
@@ -173,7 +270,41 @@ function checkin_durchfuehren(PDO $pdo, array $benutzer, ?string $notiz): array
     );
     $update->execute([$neuerStreak, $neuerLaengsterStreak, $neuePunkte, $benutzer['id']]);
 
-    return ['streak' => $neuerStreak, 'neue_meilensteine' => $neueMeilensteine];
+    return [
+        'streak' => $neuerStreak,
+        'tagesbonus' => $tagesbonus,
+        'neue_meilensteine' => $neueMeilensteine,
+        'bereits_erledigt' => false,
+    ];
+}
+
+/**
+ * Meldet einen Rückfall ("ich habe heute getrunken"): zieht Punkte ab
+ * (nie unter 0) und setzt den aktuellen Streak zurück auf 0.
+ *
+ * @return array{abzug:int, bereits_erledigt: bool}
+ */
+function rueckfall_melden(PDO $pdo, array $benutzer, ?string $notiz): array
+{
+    if (hat_heute_eingecheckt($pdo, $benutzer['id']) || hat_heute_rueckfall($pdo, $benutzer['id'])) {
+        return ['abzug' => 0, 'bereits_erledigt' => true];
+    }
+
+    $abzug = min(RUECKFALL_PUNKTE_ABZUG, (int) $benutzer['punkte']);
+
+    $insert = $pdo->prepare(
+        'INSERT INTO rueckfaelle (benutzer_id, rueckfall_datum, punkte_abgezogen, notiz) VALUES (?, CURDATE(), ?, ?)'
+    );
+    $insert->execute([$benutzer['id'], RUECKFALL_PUNKTE_ABZUG, $notiz !== '' ? $notiz : null]);
+
+    $update = $pdo->prepare(
+        'UPDATE benutzer
+         SET punkte = GREATEST(punkte - ?, 0), aktueller_streak = 0, letzter_checkin = CURDATE()
+         WHERE id = ?'
+    );
+    $update->execute([RUECKFALL_PUNKTE_ABZUG, $benutzer['id']]);
+
+    return ['abzug' => $abzug, 'bereits_erledigt' => false];
 }
 
 /**
@@ -194,6 +325,20 @@ function checkin_kalender(PDO $pdo, int $benutzerId, int $tage = 35): array
         $kalender[$datum] = isset($eingecheckt[$datum]);
     }
     return $kalender;
+}
+
+/**
+ * Nächste höhere Tages-Bonus-Stufe (z.B. "noch 3 Tage bis Feuer-Serie +20/Tag").
+ */
+function naechste_punkte_stufe(int $aktuellerStreak): ?array
+{
+    $aufsteigend = array_reverse(PUNKTE_STUFEN);
+    foreach ($aufsteigend as $stufe) {
+        if ($stufe['ab_tag'] > 1 && $stufe['ab_tag'] > $aktuellerStreak) {
+            return ['fehlende_tage' => $stufe['ab_tag'] - $aktuellerStreak] + $stufe;
+        }
+    }
+    return null;
 }
 
 function naechster_meilenstein(int $aktuellerStreak): ?array

@@ -16,10 +16,12 @@ require __DIR__ . '/includes/header.php';
 <div class="hero">
     <h1>Ohne Alkohol. Jeden Tag ein Sieg. 🌱</h1>
     <p>
-        Trockenheld ist deine tägliche Challenge: Ein Klick am Tag bestätigt,
-        dass du nichts Alkoholisches getrunken hast. Sammle Streaks, verdiene
-        Bonuspunkte bei Meilensteinen und gönn dir bei Woche, Monat, Halbjahr
-        und Jahr eine wohlverdiente Belohnung.
+        Trockenheld ist dein tägliches Challenge-Game: Ein Klick bestätigt,
+        dass du nichts Alkoholisches getrunken hast – dafür gibt's Punkte,
+        die mit jedem Tag deiner Serie steigen ("Combo-Bonus"), Level-Aufstiege
+        und satte Boni bei Woche, Monat, Halbjahr und Jahr. Ein Rückfall kostet
+        dagegen deutlich mehr Punkte, als ein guter Tag bringt – Ehrlichkeit
+        zu dir selbst lohnt sich.
     </p>
     <div class="hero-actions">
         <a href="register.php" class="btn btn-primary btn-lg">Kostenlos starten</a>
@@ -50,8 +52,8 @@ require __DIR__ . '/includes/header.php';
         <p class="muted">Ein Klick pro Tag genügt, um deinen Fortschritt im Logbuch mit Smileys festzuhalten.</p>
     </div>
     <div class="card">
-        <h3>🔥 Streaks &amp; Punkte</h3>
-        <p class="muted">Bei 7, 30, 182 und 365 Tagen am Stück gibt's Bonuspunkte und eine selbstgewählte Belohnung.</p>
+        <h3>🔥 Streaks, Level &amp; Punkte</h3>
+        <p class="muted">Jeder trockene Tag bringt mehr Punkte als der davor. Bei 7, 30, 182 und 365 Tagen gibt's fette Boni und eine selbstgewählte Belohnung – ein Rückfall kostet dagegen spürbar mehr, als du an einem Tag gewinnst.</p>
     </div>
     <div class="card">
         <h3>👥 Öffentliches Profil</h3>

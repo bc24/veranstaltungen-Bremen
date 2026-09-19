@@ -40,6 +40,7 @@ $stmt->execute([$profil['id']]);
 $belohnungen = $stmt->fetchAll();
 
 $name = $profil['anzeigename'] ?: $profil['benutzername'];
+$level = level_info((int) $profil['punkte']);
 $seitentitel = 'Profil von ' . $name;
 require __DIR__ . '/includes/header.php';
 ?>
@@ -50,7 +51,9 @@ require __DIR__ . '/includes/header.php';
         <div>
             <h1 class="mt-0" style="margin-bottom:4px;"><?= h($name) ?></h1>
             <p class="muted" style="margin:0;">
-                @<?= h($profil['benutzername']) ?>
+                @<?= h($profil['benutzername']) ?> ·
+                <span class="level-badge" style="padding:2px 10px;font-size:0.8rem;">Lvl <?= (int) $level['level'] ?></span>
+                <?= h($level['titel']) ?>
                 <?php if ($profil['wohnort']): ?> · <?= h($profil['wohnort']) ?><?php endif; ?>
                 <?php if (!$profil['profil_oeffentlich']): ?> · <span title="Nur für dich sichtbar">🔒 privat</span><?php endif; ?>
             </p>

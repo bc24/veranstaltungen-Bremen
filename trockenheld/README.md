@@ -80,7 +80,20 @@ trockenheld/
 ├── impressum.php / datenschutz.php
 ```
 
-## Meilensteine & Bonuspunkte
+## Spielmechanik
+
+**Tages-Bonus (Combo):** Jeder Check-in bringt Punkte, die mit der Länge der
+aktuellen Serie steigen:
+
+| Stufe            | ab Tag | Punkte/Tag |
+|-------------------|--------|------------|
+| 🌱 Start-Bonus     | 1      | 10         |
+| ⚡ Powerstreak      | 7      | 15         |
+| 🔥 Feuer-Serie      | 30     | 20         |
+| 💎 Diamant-Serie    | 182    | 30         |
+| 👑 Legenden-Modus   | 365    | 50         |
+
+**Meilenstein-Boni** (einmalig pro erreichter Serie, zusätzlich zum Tages-Bonus):
 
 | Stufe       | Tage am Stück | Bonuspunkte |
 |-------------|---------------|-------------|
@@ -89,5 +102,14 @@ trockenheld/
 | Ein halbes Jahr | 182       | 1000        |
 | Ein ganzes Jahr | 365       | 3000        |
 
-Die Werte lassen sich in `includes/functions.php` in der Konstante
-`MEILENSTEINE` anpassen.
+**Rückfall ("Ich habe getrunken"):** kostet 150 Punkte (nie unter 0) und
+setzt die aktuelle Serie auf 0 zurück – bewusst deutlich mehr, als ein
+guter Tag bringt.
+
+**Level-System:** Der Punktestand schaltet Level mit eigenen Titeln frei
+(Trocken-Neuling → Durchhalter → Kämpfer → Krieger → Champion → Meister →
+Trockenheld-Legende), inkl. Fortschrittsbalken im Dashboard.
+
+Alle Werte lassen sich in `includes/functions.php` in den Konstanten
+`MEILENSTEINE`, `PUNKTE_STUFEN`, `RUECKFALL_PUNKTE_ABZUG` und
+`LEVEL_STUFEN` anpassen.
