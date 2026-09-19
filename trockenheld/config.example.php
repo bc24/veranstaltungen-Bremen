@@ -26,9 +26,5 @@ define('APP_URL', 'https://deine-domain.de/trockenheld/');
 define('MAIL_ABSENDER', 'frank@panzerit.de');
 define('MAIL_ABSENDER_NAME', APP_NAME);
 
-// Geheimer Schlüssel für Session-/CSRF-Schutz – hier eine eigene,
-// zufällige Zeichenkette eintragen (z.B. per Passwort-Generator erzeugen)
-define('APP_SECRET', 'BITTE_AENDERN_ZUFAELLIGE_ZEICHENKETTE');
-
 // --- Zeitzone --------------------------------------------------------
 date_default_timezone_set('Europe/Berlin');

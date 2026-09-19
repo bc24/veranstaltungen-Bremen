@@ -24,7 +24,7 @@ CREATE TABLE IF NOT EXISTS benutzer (
     start_datum             DATE         NOT NULL,
     ziel_tage               INT          NULL,
     profil_oeffentlich      TINYINT(1)   NOT NULL DEFAULT 1,
-    email_erinnerung        TINYINT(1)   NOT NULL DEFAULT 1,
+    email_erinnerung        TINYINT(1)   NOT NULL DEFAULT 0,
     punkte                  INT          NOT NULL DEFAULT 0,
     aktueller_streak        INT          NOT NULL DEFAULT 0,
     laengster_streak        INT          NOT NULL DEFAULT 0,
