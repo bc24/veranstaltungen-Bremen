@@ -23,7 +23,7 @@ define('APP_URL', 'https://deine-domain.de/trockenheld/');
 
 // Absender-Adresse für Erinnerungs-E-Mails (muss auf deinem Server als
 // Absender erlaubt sein, sonst landen die Mails im Spam / werden abgelehnt)
-define('MAIL_ABSENDER', 'erinnerung@deine-domain.de');
+define('MAIL_ABSENDER', 'frank@panzerit.de');
 define('MAIL_ABSENDER_NAME', APP_NAME);
 
 // Geheimer Schlüssel für Session-/CSRF-Schutz – hier eine eigene,
